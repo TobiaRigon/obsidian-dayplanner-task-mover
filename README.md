@@ -6,6 +6,12 @@
 
 Automate the rollover of incomplete tasks from one daily note to the next in Obsidian, preserving headers and skipping weekends if desired.
 
+Before using this script, you **must adapt it to your vault** by adjusting these 3 things:
+
+1. **Date Format** — Your daily notes' filenames must match one of the supported date formats.
+2. **Weekend Skipping** — Choose whether tasks should skip weekends or always move to the next day.
+3. **Template File** — If you use a template for your daily notes, the script can copy from it. If not, you can disable that part.
+
 ---
 
 ## ✅ Features
@@ -14,22 +20,23 @@ Automate the rollover of incomplete tasks from one daily note to the next in Obs
 - Preserves header structure (`#`, `##`, etc.).
 - Skips weekends: Friday → Monday.
 - Prevents duplication.
-- Creates next day’s note from template if it doesn’t exist.
+- Creates next day’s note from a **template** if it doesn’t exist.
 
 ---
 
 ## 📦 Installation
 
 1. Save the script as `rollover-tasks.js` in your vault.
-2. Install the **QuickAdd** plugin.
-3. In QuickAdd:
+2. Adapt the script to your needs by editing the sections for date format, weekend skipping, and template path — as described in this README.
+3. Install the **QuickAdd** plugin.
+4. In QuickAdd:
 
    - Create a new **Macro**.
    - Add an action: **User Script** → Select `rollover-tasks.js`.
    - Create a **Choice** of type `Macro`, link it to the macro.
    - Enable the ⚡ lightning bolt to make it appear in the command palette.
 
-4. (Optional) Assign a hotkey.
+5. (Optional) Assign a hotkey.
 
 ---
 
@@ -59,6 +66,8 @@ const [, day, month, year] = currentFilename.match(dateRegex).map(Number);
 // const [, year, month, day] = ...
 ```
 
+✅ Make sure **only one block is active** at a time.
+
 ---
 
 ## 🔁 Weekend Skipping
@@ -74,12 +83,31 @@ To disable weekend skipping (i.e. always go to the next day), comment out the sk
 
 ---
 
-## 🧩 Template Path
+## 🧩 Template File
 
-Make sure the template path in the script matches your vault:
+A **template** is a Markdown file that acts as the default structure for your daily notes (e.g. containing placeholders, headings, predefined tasks).
+
+By default, the script looks for:
 
 ```js
 const templatePath = "src/Templates/Daily Note Template.md";
+```
+
+If you don't use templates, you can remove or comment out this section of the script:
+
+```js
+const templateFile = app.vault.getAbstractFileByPath(templatePath);
+// ...
+if (!templateFile) return;
+// ...
+const templateContent = await app.vault.read(templateFile);
+await app.vault.create(nextFilePath, templateContent);
+```
+
+Or replace it with:
+
+```js
+await app.vault.create(nextFilePath, ""); // Create an empty note instead
 ```
 
 ---
